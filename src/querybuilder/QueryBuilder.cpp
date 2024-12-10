@@ -1,7 +1,8 @@
 #include "QueryBuilder.h"
 #include "../entrypoint.h"
+#include "../utils.h"
+#include "../rules/ValidationParser.h"
 #include <stdexcept>
-#include <sstream>
 
 #define ENSURE_TABLE_SET() \
     if (this->tableName.empty()) { \
@@ -14,16 +15,28 @@ IQueryBuilder* QueryBuilder::Table(std::string tableName)
     return this;
 }
 
-IQueryBuilder* QueryBuilder::Create(std::map<std::string, std::string> columns)
+IQueryBuilder* QueryBuilder::Create(std::unordered_map<std::string, std::string> columns)
 {
     ENSURE_TABLE_SET();
-    this->query = "CREATE TABLE IF NOT EXISTS " + this->tableName + " (";
+    
+    auto rules = parseRules(columns);
     std::vector<std::string> columnDefinitions;
-    for (const auto& pair : columns)
+    for (const auto& pair : rules)
     {
-        columnDefinitions.push_back(pair.first + " " + pair.second);
+        auto type = GenerateColumnType(pair.first, pair.second);
+        if(type == "") continue;
+        columnDefinitions.push_back(pair.first + " " + type);
     }
-    this->query += join(columnDefinitions, ", ") + ")";
+
+    this->query = "CREATE TABLE IF NOT EXISTS " + this->tableName + " (";
+    for(int i = 0; i < columnDefinitions.size(); i++) 
+        if(i == 0)
+            this->query += columnDefinitions[i];
+        else
+            this->query += ", " + columnDefinitions[i];
+
+    this->query += ")";
+    
     return this;
 }
 
@@ -46,7 +59,7 @@ IQueryBuilder* QueryBuilder::Select(std::vector<std::string> columns)
     if (columns.empty()) {
         this->query = "SELECT * FROM " + this->tableName;
     } else {
-        this->query = "SELECT " + join(columns, ", ") + " FROM " + this->tableName;
+        this->query = "SELECT " + implode(columns, ", ") + " FROM " + this->tableName;
     }
     return this;
 }
@@ -67,7 +80,7 @@ IQueryBuilder* QueryBuilder::Insert(std::map<std::string, std::string> data)
         values.push_back(pair.second);
     }
 
-    this->query = "INSERT INTO " + tableName + " (" + join(columns, ", ") + ") VALUES (" + join(values, ", ") + ")";
+    this->query = "INSERT INTO " + tableName + " (" + implode(columns, ", ") + ") VALUES (" + implode(values, ", ") + ")";
     return this;
 }
 
@@ -83,7 +96,7 @@ IQueryBuilder* QueryBuilder::Update(std::map<std::string, std::string> data)
         updates.push_back(pair.first + " = " + pair.second);
     }
 
-    this->query = "UPDATE " + tableName + " SET " + join(updates, ", ");
+    this->query = "UPDATE " + tableName + " SET " + implode(updates, ", ");
     return this;
 }
 
@@ -195,7 +208,7 @@ std::any QueryBuilder::PrepareQuery()
 
     // Join clauses
     if (!this->joinClauses.empty()) {
-        finalQuery += " " + join(this->joinClauses, " ");
+        finalQuery += " " + implode(this->joinClauses, " ");
     }
 
     // Add WHERE clause, handle AND/OR combination
@@ -204,7 +217,7 @@ std::any QueryBuilder::PrepareQuery()
         
         // Handle WHERE
         if (!this->whereClauses.empty()) {
-            combinedWhereClause += join(whereClauses, " AND ");
+            combinedWhereClause += implode(whereClauses, " AND ");
         }
         
         // Handle OR WHERE
@@ -212,7 +225,7 @@ std::any QueryBuilder::PrepareQuery()
             if (!combinedWhereClause.empty()) {
                 combinedWhereClause += " OR ";
             }
-            combinedWhereClause += join(orWhereClauses, " OR ");
+            combinedWhereClause += implode(orWhereClauses, " OR ");
         }
         
         // Add to final query
@@ -221,17 +234,17 @@ std::any QueryBuilder::PrepareQuery()
 
     // Add GROUP BY clauses
     if (!this->groupByClauses.empty()) {
-        finalQuery += " GROUP BY " + join(groupByClauses, ", ");
+        finalQuery += " GROUP BY " + implode(groupByClauses, ", ");
     }
 
     // Add HAVING clauses
     if (!this->havingClauses.empty()) {
-        finalQuery += " HAVING " + join(this->havingClauses, " AND ");
+        finalQuery += " HAVING " + implode(this->havingClauses, " AND ");
     }
 
     // Add ORDER BY clauses
     if (!this->orderByClauses.empty()) {
-        finalQuery += " ORDER BY " + join(this->orderByClauses, ", ");
+        finalQuery += " ORDER BY " + implode(this->orderByClauses, ", ");
     }
 
     // Add LIMIT if specified
@@ -246,25 +259,13 @@ std::any QueryBuilder::PrepareQuery()
 
     // Add ON DUPLICATE KEY UPDATE if specified
     if (!this->onDuplicateClauses.empty()) {
-        finalQuery += " ON DUPLICATE KEY UPDATE " + join(this->onDuplicateClauses, ", ");
+        finalQuery += " ON DUPLICATE KEY UPDATE " + implode(this->onDuplicateClauses, ", ");
     }
 
     // Add UNION clauses if any
     if (!this->unionClauses.empty()) {
-        finalQuery += " " + join(this->unionClauses, " ");
+        finalQuery += " " + implode(this->unionClauses, " ");
     }
 
     return finalQuery;
-}
-
-template<typename T>
-std::string QueryBuilder::join(const std::vector<T>& vec, const std::string& delimiter) {
-    std::ostringstream oss;
-    for (size_t i = 0; i < vec.size(); ++i) {
-        oss << vec[i];
-        if (i != vec.size() - 1) {
-            oss << delimiter;
-        }
-    }
-    return oss.str();
 }

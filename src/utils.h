@@ -2,6 +2,10 @@
 #define _utils_h
 
 #include <string>
+#include <vector>
+
+std::vector<std::string> explode(std::string str, std::string delimiter);
+std::string implode(std::vector<std::string> elements, std::string delimiter);
 
 template <typename... Args>
 std::string string_format(const std::string &format, Args... args)

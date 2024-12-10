@@ -25,7 +25,7 @@ private:
 
 public:
     IQueryBuilder* Table(std::string tableName);
-    IQueryBuilder* Create(std::map<std::string, std::string> columns);
+    IQueryBuilder* Create(std::unordered_map<std::string, std::string> columns);
     IQueryBuilder* Alter(std::map<std::string, std::string> columns);
     IQueryBuilder* Drop();
 
@@ -47,10 +47,6 @@ public:
     IQueryBuilder* Union(std::string query, bool all);
 
     std::any PrepareQuery();
-
-private:
-    template<typename T>
-    std::string join(const std::vector<T>& vec, const std::string& delimiter);
 };
 
 #endif
