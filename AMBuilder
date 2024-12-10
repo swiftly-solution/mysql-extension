@@ -1,8 +1,8 @@
 import os
 import fnmatch
 
-MMSPlugin.plugin_name = 'baseext'
-MMSPlugin.plugin_alias = 'baseext'
+MMSPlugin.plugin_name = 'mysql.db.ext'
+MMSPlugin.plugin_alias = 'mysql.db.ext'
 
 for sdk_target in MMSPlugin.sdk_targets:
     sdk = sdk_target.sdk
@@ -53,6 +53,7 @@ for sdk_target in MMSPlugin.sdk_targets:
         binary.compiler.postlink += [
             os.path.join(builder.sourcePath, 'vendor', 'funchook', 'lib', 'libfunchook.a'),
       		os.path.join(builder.sourcePath, 'vendor', 'funchook', 'lib', 'libdistorm.a'),
+            os.path.join(builder.sourcePath, 'vendor', 'mysql', 'linuxsteamrt64', 'lib', 'libmysqlclient.a'),
 
             "-lgnutls",
             "-lz",
@@ -95,6 +96,7 @@ for sdk_target in MMSPlugin.sdk_targets:
         binary.compiler.postlink += [
             os.path.join(builder.sourcePath, 'vendor', 'funchook', 'lib', 'funchook.lib'),
 		    os.path.join(builder.sourcePath, 'vendor', 'funchook', 'lib', 'distorm.lib'),
+            os.path.join(builder.sourcePath, 'vendor', 'mysql', 'win64', 'lib', 'mysqlclient.lib'),
       		"psapi.lib",
             "winmm.lib",
             "ws2_32.lib",
@@ -152,6 +154,8 @@ for sdk_target in MMSPlugin.sdk_targets:
     binary.compiler.cxxincludes += [
         os.path.join(builder.sourcePath, 'vendor'),
         os.path.join(builder.sourcePath, 'vendor', 'LuaBridge', 'Source'),
+        os.path.join(builder.sourcePath, 'vendor', 'json', 'include'),
+        os.path.join(builder.sourcePath, 'vendor', 'mysql', ('win64' if binary.compiler.target.platform == 'windows' else 'linuxsteamrt64'), 'include'),
 
         os.path.join(sdk['path']),
         os.path.join(sdk['path'], 'public'),
