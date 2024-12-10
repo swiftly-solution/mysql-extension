@@ -88,17 +88,34 @@ std::any ParseFieldType(enum_field_types type, const char* value, uint32_t lengt
 {
     if (type == enum_field_types::MYSQL_TYPE_FLOAT || type == enum_field_types::MYSQL_TYPE_DOUBLE || type == enum_field_types::MYSQL_TYPE_DECIMAL)
         return atof(value);
-    else if (type == enum_field_types::MYSQL_TYPE_SHORT || type == enum_field_types::MYSQL_TYPE_TINY || type == enum_field_types::MYSQL_TYPE_INT24 || type == enum_field_types::MYSQL_TYPE_LONG || type == enum_field_types::MYSQL_TYPE_NEWDECIMAL)
+    else if (type == enum_field_types::MYSQL_TYPE_SHORT || type == enum_field_types::MYSQL_TYPE_TINY || type == enum_field_types::MYSQL_TYPE_INT24 || type == enum_field_types::MYSQL_TYPE_LONG || type == enum_field_types::MYSQL_TYPE_NEWDECIMAL || type == enum_field_types::MYSQL_TYPE_YEAR || type == enum_field_types::MYSQL_TYPE_BIT)
         return atoi(value);
-    else if (type == enum_field_types::MYSQL_TYPE_VARCHAR || type == enum_field_types::MYSQL_TYPE_VAR_STRING || type == enum_field_types::MYSQL_TYPE_BLOB || type == MYSQL_JSON || type == enum_field_types::MYSQL_TYPE_TIMESTAMP) {
+    else if (
+        type == enum_field_types::MYSQL_TYPE_VARCHAR || 
+        type == enum_field_types::MYSQL_TYPE_VAR_STRING || 
+        type == enum_field_types::MYSQL_TYPE_BLOB || 
+        type == MYSQL_JSON || 
+        type == enum_field_types::MYSQL_TYPE_TIMESTAMP ||
+        type == enum_field_types::MYSQL_TYPE_DATE ||
+        type == enum_field_types::MYSQL_TYPE_TIME ||
+        type == enum_field_types::MYSQL_TYPE_DATETIME ||
+        type == enum_field_types::MYSQL_TYPE_NEWDATE ||
+        type == enum_field_types::MYSQL_TYPE_ENUM ||
+        type == enum_field_types::MYSQL_TYPE_SET ||
+        type == enum_field_types::MYSQL_TYPE_STRING ||
+        type == enum_field_types::MYSQL_TYPE_TINY_BLOB ||
+        type == enum_field_types::MYSQL_TYPE_MEDIUM_BLOB ||
+        type == enum_field_types::MYSQL_TYPE_LONG_BLOB ||
+        type == enum_field_types::MYSQL_TYPE_GEOMETRY
+    ) {
         return std::string(value, length + 1);
     }
     else if (type == enum_field_types::MYSQL_TYPE_LONGLONG)
         return strtoll(value, nullptr, 10);
     else
     {
-        g_SMAPI->ConPrintf("[MySQL - ParseFieldType] Invalid field type: %d.\n", type);
-        return nullptr;
+        g_SMAPI->ConPrintf("[MySQL - ParseFieldType] Invalid field type: %d, falling back to string.\n", type);
+        return std::string(value, length + 1);
     }
 }
 
