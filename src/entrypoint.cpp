@@ -22,6 +22,15 @@ typedef void (*RegisterDriver)(void*);
 /////////////////          Core Class          //////////////
 ////////////////////////////////////////////////////////////
 
+#ifdef _WIN32
+FILE _ioccc[] = { *stdin, *stdout, *stderr };
+extern "C" FILE* __cdecl __iob_func(void)
+{
+    return _ioccc;
+}
+#endif
+
+
 EXT_EXPOSE(g_Ext);
 bool MySQLExtension::Load(std::string& error, SourceHook::ISourceHook *SHPtr, ISmmAPI* ismm, bool late)
 {
