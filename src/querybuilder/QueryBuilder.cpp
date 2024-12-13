@@ -28,14 +28,7 @@ IQueryBuilder* QueryBuilder::Create(std::unordered_map<std::string, std::string>
         columnDefinitions.push_back(pair.first + " " + type);
     }
 
-    this->query = "CREATE TABLE IF NOT EXISTS " + this->tableName + " (";
-    for(int i = 0; i < columnDefinitions.size(); i++) 
-        if(i == 0)
-            this->query += columnDefinitions[i];
-        else
-            this->query += ", " + columnDefinitions[i];
-
-    this->query += ")";
+    this->query = "CREATE TABLE IF NOT EXISTS " + this->tableName + " (" + implode(columnDefinitions, ", ") + ")";
     
     return this;
 }

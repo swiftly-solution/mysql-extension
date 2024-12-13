@@ -16,15 +16,3 @@ std::vector<std::string> explode(std::string s, std::string delimiter)
     res.push_back(s.substr(pos_start));
     return res;
 }
-
-std::string implode(std::vector<std::string> elements, std::string delimiter)
-{
-    std::string s;
-    for (std::vector<std::string>::iterator ii = elements.begin(); ii != elements.end(); ++ii)
-    {
-        s += (*ii);
-        if (ii + 1 != elements.end())
-            s += delimiter;
-    }
-    return s;
-}

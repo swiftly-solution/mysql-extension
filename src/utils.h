@@ -3,9 +3,22 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 std::vector<std::string> explode(std::string str, std::string delimiter);
-std::string implode(std::vector<std::string> elements, std::string delimiter);
+
+template<typename T>
+std::string implode(std::vector<T> elements, std::string delimiter)
+{
+    std::ostringstream oss;
+    for (size_t i = 0; i < elements.size(); ++i) {
+        oss << elements[i];
+        if (i != elements.size() - 1) {
+            oss << delimiter;
+        }
+    }
+    return oss.str();
+}
 
 template <typename... Args>
 std::string string_format(const std::string &format, Args... args)
