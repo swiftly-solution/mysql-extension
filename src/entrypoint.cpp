@@ -40,11 +40,7 @@ bool MySQLExtension::Load(std::string& error, SourceHook::ISourceHook *SHPtr, IS
         return false;
     }
 
-    server = (ISource2Server *)ismm->VInterfaceMatch(ismm->GetServerFactory(), INTERFACEVERSION_SERVERGAMEDLL, 0); 
-    if (!server) {
-        error = "Could not find interface: " INTERFACEVERSION_SERVERGAMEDLL;
-        return false;
-    }
+    GET_IFACE_ANY(GetServerFactory, server, ISource2Server, INTERFACEVERSION_SERVERGAMEDLL);
 
     HINSTANCE m_hModule;
     #ifdef _WIN32
