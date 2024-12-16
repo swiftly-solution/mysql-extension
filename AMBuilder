@@ -33,6 +33,7 @@ for sdk_target in MMSPlugin.sdk_targets:
     if binary.compiler.target.platform == 'linux':
         binary.compiler.cxxflags += [
             "-Wno-invalid-offsetof",
+            "-Wno-write-strings",
             "-Wno-return-local-addr",
             "-Wno-overloaded-virtual",
             "-Wno-unknown-pragmas",

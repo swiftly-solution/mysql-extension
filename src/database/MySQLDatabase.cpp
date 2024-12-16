@@ -51,6 +51,7 @@ bool MySQLDatabase::Connect()
     this->connected = true;
 
     this->Query(string_format("ALTER DATABASE %s CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;", this->m_database.c_str()));
+    m_version = explode(std::any_cast<std::string>(this->Query(std::string("select @@version;"))[0]["@@version"]), "-")[0];
 
     return true;
 }
@@ -193,7 +194,7 @@ std::string MySQLDatabase::EscapeValue(std::string query)
 
 std::string MySQLDatabase::GetVersion()
 {
-    return mysql_get_server_info(this->connection);
+    return m_version;
 }
 
 std::string MySQLDatabase::GetKind()
@@ -213,5 +214,10 @@ void MySQLDatabase::AddQueryQueue(DatabaseQueryQueue data)
 
 IQueryBuilder* MySQLDatabase::ProvideQueryBuilder()
 {
-    return new QueryBuilder();
+    return new QueryBuilder(this->GetVersion());
+}
+
+void MySQLDatabase::DeallocateQueryBuilder(IQueryBuilder* qb)
+{
+    delete (QueryBuilder*)qb;
 }

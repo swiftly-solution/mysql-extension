@@ -3,6 +3,24 @@
 #include "../entrypoint.h"
 #include <set>
 
+std::vector<std::string> mysqlServerWithoutJsonDefault = {
+    "5.0",
+    "5.1",
+    "5.2",
+    "5.3",
+    "5.4",
+    "5.5",
+    "5.6",
+    "5.7",
+};
+
+bool starts_with(std::string value, std::string starting)
+{
+    if (value.size() < starting.size())
+        return false;
+    return std::equal(starting.begin(), starting.end(), value.begin());
+}
+
 ValidationRule ParseRule(std::string ruleString)
 {
     ValidationRule rule;
@@ -30,7 +48,7 @@ std::unordered_map<std::string, std::vector<ValidationRule>> parseRules(std::uno
     return parsedRules;
 }
 
-std::string GenerateColumnType(std::string column_name, std::vector<ValidationRule> rules)
+std::string GenerateColumnType(std::string column_name, std::vector<ValidationRule> rules, std::string server_version)
 {
     std::string ret_type = "VARCHAR(255)";
     std::string defaultValue = "";
@@ -42,6 +60,13 @@ std::string GenerateColumnType(std::string column_name, std::vector<ValidationRu
     bool primary_key = false;
     bool index = false;
     bool auto_incremenet = false;
+
+    bool oldServer = false;
+    for(auto ver : mysqlServerWithoutJsonDefault)
+        if(server_version.find(ver) != std::string::npos) {
+            oldServer = true;
+            break;
+        }
 
     for(auto rule : rules) {
         if(rule.name == "nullable")
@@ -67,7 +92,8 @@ std::string GenerateColumnType(std::string column_name, std::vector<ValidationRu
             if(ret_type.find("VARCHAR") != std::string::npos)
                 ret_type = string_format("VARCHAR(%d)", maxVal);
         } else if(rule.name == "json") {
-            ret_type = "JSON";
+            if(!oldServer) ret_type = "JSON";
+            else ret_type = "VARCHAR(16380)";
             defaultValue = "{}";
             defaultSet = true;
         } else if(rule.name == "float") {
@@ -98,8 +124,12 @@ std::string GenerateColumnType(std::string column_name, std::vector<ValidationRu
         ret_type += " NOT NULL";
     }
 
-    if(defaultSet)
-        ret_type += " DEFAULT '"+ defaultValue +"'";
+    if(defaultSet) {
+        if(starts_with(ret_type, "JSON") || starts_with(ret_type, "VARCHAR"))
+            ret_type += " DEFAULT '"+ defaultValue +"'";
+        else
+            ret_type += " DEFAULT " + defaultValue;
+    }
 
     if(auto_incremenet)
         ret_type += " AUTO_INCREMENT";

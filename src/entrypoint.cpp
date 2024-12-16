@@ -1,5 +1,6 @@
 #include "entrypoint.h"
 #include "driver/DBDriver.h"
+#include <swiftly-ext/files.h>
 
 //////////////////////////////////////////////////////////////
 /////////////////        Core Variables        //////////////
@@ -30,7 +31,6 @@ extern "C" FILE* __cdecl __iob_func(void)
 }
 #endif
 
-
 EXT_EXPOSE(g_Ext);
 bool MySQLExtension::Load(std::string& error, SourceHook::ISourceHook *SHPtr, ISmmAPI* ismm, bool late)
 {
@@ -44,9 +44,9 @@ bool MySQLExtension::Load(std::string& error, SourceHook::ISourceHook *SHPtr, IS
 
     HINSTANCE m_hModule;
     #ifdef _WIN32
-        m_hModule = dlmount("addons/swiftly/bin/win64/swiftly.dll");
+        m_hModule = dlmount(GeneratePath("addons/swiftly/bin/win64/swiftly.dll"));
     #else
-        m_hModule = dlopen("addons/swiftly/bin/linuxsteamrt64/swiftly.so", RTLD_NOW);
+        m_hModule = dlopen(GeneratePath("addons/swiftly/bin/linuxsteamrt64/swiftly.so"), RTLD_NOW);
         if(!m_hModule) {
             error = "Could not open swiftly.so as a module.";
             return false;

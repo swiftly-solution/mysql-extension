@@ -23,28 +23,32 @@ private:
     int limitCount = -1;
     int offsetCount = -1;
 
+    std::string m_version;
+
 public:
-    IQueryBuilder* Table(std::string tableName);
-    IQueryBuilder* Create(std::unordered_map<std::string, std::string> columns);
-    IQueryBuilder* Alter(std::map<std::string, std::string> columns);
-    IQueryBuilder* Drop();
+    QueryBuilder(std::string version);
 
-    IQueryBuilder* Select(std::vector<std::string> columns);
-    IQueryBuilder* Insert(std::map<std::string, std::string> data);
-    IQueryBuilder* Update(std::map<std::string, std::string> data);
-    IQueryBuilder* Delete();
+    void Table(std::string tableName);
+    void Create(std::unordered_map<std::string, std::string> columns);
+    void Alter(std::map<std::string, std::string> columns);
+    void Drop();
 
-    IQueryBuilder* Where(std::string column, std::string operator_, std::string value);
-    IQueryBuilder* OrWhere(std::string column, std::string operator_, std::string value);
-    IQueryBuilder* Join(std::string table, std::string onCondition, std::string joinType = "INNER");
-    IQueryBuilder* OrderBy(std::vector<std::pair<std::string, std::string>> columns);
-    IQueryBuilder* Limit(int count);
-    IQueryBuilder* GroupBy(std::vector<std::string> columns);
-    IQueryBuilder* OnDuplicate(std::map<std::string, std::string> data);
-    IQueryBuilder* Having(std::string condition);
-    IQueryBuilder* Distinct();
-    IQueryBuilder* Offset(int count);
-    IQueryBuilder* Union(std::string query, bool all);
+    void Select(std::vector<std::string> columns);
+    void Insert(std::map<std::string, std::string> data);
+    void Update(std::map<std::string, std::string> data);
+    void Delete();
+
+    void Where(std::string column, std::string operator_, std::string value);
+    void OrWhere(std::string column, std::string operator_, std::string value);
+    void Join(std::string table, std::string onCondition, std::string joinType = "INNER");
+    void OrderBy(std::vector<std::pair<std::string, std::string>> columns);
+    void Limit(int count);
+    void GroupBy(std::vector<std::string> columns);
+    void OnDuplicate(std::map<std::string, std::string> data);
+    void Having(std::string condition);
+    void Distinct();
+    void Offset(int count);
+    void Union(std::string query, bool all);
 
     std::any PrepareQuery();
 };

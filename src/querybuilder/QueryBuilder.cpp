@@ -9,13 +9,17 @@
         throw std::runtime_error("Table name must be set before executing the query."); \
     }
 
-IQueryBuilder* QueryBuilder::Table(std::string tableName)
+QueryBuilder::QueryBuilder(std::string version)
 {
-    this->tableName = tableName;
-    return this;
+    m_version = version;
 }
 
-IQueryBuilder* QueryBuilder::Create(std::unordered_map<std::string, std::string> columns)
+void QueryBuilder::Table(std::string tableName)
+{
+    this->tableName = tableName;
+}
+
+void QueryBuilder::Create(std::unordered_map<std::string, std::string> columns)
 {
     ENSURE_TABLE_SET();
     
@@ -23,30 +27,26 @@ IQueryBuilder* QueryBuilder::Create(std::unordered_map<std::string, std::string>
     std::vector<std::string> columnDefinitions;
     for (const auto& pair : rules)
     {
-        auto type = GenerateColumnType(pair.first, pair.second);
+        auto type = GenerateColumnType(pair.first, pair.second, m_version);
         if(type == "") continue;
         columnDefinitions.push_back(pair.first + " " + type);
     }
 
     this->query = "CREATE TABLE IF NOT EXISTS " + this->tableName + " (" + implode(columnDefinitions, ", ") + ")";
-    
-    return this;
 }
 
-IQueryBuilder* QueryBuilder::Alter(std::map<std::string, std::string> columns)
+void QueryBuilder::Alter(std::map<std::string, std::string> columns)
 {
     g_SMAPI->ConPrint("[MySQL - QueryBuilder] Alter is not currently implemented.\n");
-    return this;
 }
 
-IQueryBuilder* QueryBuilder::Drop()
+void QueryBuilder::Drop()
 {
     ENSURE_TABLE_SET();
     this->query = "DROP TABLE IF EXISTS " + this->tableName;
-    return this;
 }
 
-IQueryBuilder* QueryBuilder::Select(std::vector<std::string> columns)
+void QueryBuilder::Select(std::vector<std::string> columns)
 {
     ENSURE_TABLE_SET();
     if (columns.empty()) {
@@ -54,10 +54,9 @@ IQueryBuilder* QueryBuilder::Select(std::vector<std::string> columns)
     } else {
         this->query = "SELECT " + implode(columns, ", ") + " FROM " + this->tableName;
     }
-    return this;
 }
 
-IQueryBuilder* QueryBuilder::Insert(std::map<std::string, std::string> data)
+void QueryBuilder::Insert(std::map<std::string, std::string> data)
 {
     ENSURE_TABLE_SET();
 
@@ -74,10 +73,9 @@ IQueryBuilder* QueryBuilder::Insert(std::map<std::string, std::string> data)
     }
 
     this->query = "INSERT INTO " + tableName + " (" + implode(columns, ", ") + ") VALUES (" + implode(values, ", ") + ")";
-    return this;
 }
 
-IQueryBuilder* QueryBuilder::Update(std::map<std::string, std::string> data)
+void QueryBuilder::Update(std::map<std::string, std::string> data)
 {
     ENSURE_TABLE_SET();
 
@@ -90,36 +88,31 @@ IQueryBuilder* QueryBuilder::Update(std::map<std::string, std::string> data)
     }
 
     this->query = "UPDATE " + tableName + " SET " + implode(updates, ", ");
-    return this;
 }
 
-IQueryBuilder* QueryBuilder::Delete()
+void QueryBuilder::Delete()
 {
     ENSURE_TABLE_SET();
 
     this->query = "DELETE FROM " + tableName;
-    return this;
 }
 
-IQueryBuilder* QueryBuilder::Where(std::string column, std::string operator_, std::string value)
+void QueryBuilder::Where(std::string column, std::string operator_, std::string value)
 {
     this->whereClauses.push_back(column + " " + operator_ + " " + value);
-    return this;
 }
 
-IQueryBuilder* QueryBuilder::OrWhere(std::string column, std::string operator_, std::string value)
+void QueryBuilder::OrWhere(std::string column, std::string operator_, std::string value)
 {
     this->orWhereClauses.push_back(column + " " + operator_ + " " + value);
-    return this;
 }
 
-IQueryBuilder* QueryBuilder::Join(std::string table, std::string onCondition, std::string joinType)
+void QueryBuilder::Join(std::string table, std::string onCondition, std::string joinType)
 {
     this->joinClauses.push_back(joinType + " JOIN " + table + " ON " + onCondition);
-    return this;
 }
 
-IQueryBuilder* QueryBuilder::OrderBy(std::vector<std::pair<std::string, std::string>> columns)
+void QueryBuilder::OrderBy(std::vector<std::pair<std::string, std::string>> columns)
 {
     if (columns.empty())
     {
@@ -128,22 +121,19 @@ IQueryBuilder* QueryBuilder::OrderBy(std::vector<std::pair<std::string, std::str
     for (const auto& column : columns) {
         this->orderByClauses.push_back(column.first + " " + column.second);
     }
-    return this;
 }
 
-IQueryBuilder* QueryBuilder::Limit(int count)
+void QueryBuilder::Limit(int count)
 {
     this->limitCount = count;
-    return this;
 }
 
-IQueryBuilder* QueryBuilder::GroupBy(std::vector<std::string> columns)
+void QueryBuilder::GroupBy(std::vector<std::string> columns)
 {
     this->groupByClauses = columns;
-    return this;
 }
 
-IQueryBuilder* QueryBuilder::OnDuplicate(std::map<std::string, std::string> data)
+void QueryBuilder::OnDuplicate(std::map<std::string, std::string> data)
 {
     if (data.empty()) {
         throw std::invalid_argument("OnDuplicate requires at least one column-value pair.");
@@ -152,42 +142,37 @@ IQueryBuilder* QueryBuilder::OnDuplicate(std::map<std::string, std::string> data
     for (const auto& pair : data) {
         this->onDuplicateClauses.push_back(pair.first + " = " + pair.second);
     }
-    return this;
 }
 
-IQueryBuilder* QueryBuilder::Having(std::string condition)
+void QueryBuilder::Having(std::string condition)
 {
     if (condition.empty()) {
         throw std::invalid_argument("Having condition cannot be empty.");
     }
     this->havingClauses.push_back(condition);
-    return this;
 }
 
-IQueryBuilder* QueryBuilder::Distinct()
+void QueryBuilder::Distinct()
 {
     ENSURE_TABLE_SET();
     this->isDistinct = true;
-    return this;
 }
 
-IQueryBuilder* QueryBuilder::Offset(int count)
+void QueryBuilder::Offset(int count)
 {
     if (count < 0) {
         throw std::invalid_argument("Offset cannot be negative.");
     }
     this->offsetCount = count;
-    return this;
 }
 
-IQueryBuilder* QueryBuilder::Union(std::string query, bool all)
+void QueryBuilder::Union(std::string query, bool all)
 {
     if (query.empty()) {
         throw std::invalid_argument("Union query cannot be empty.");
     }
     std::string unionType = all ? "UNION ALL" : "UNION";
     this->unionClauses.push_back(unionType + " " + query);
-    return this;
 }
 
 std::any QueryBuilder::PrepareQuery()

@@ -7,8 +7,6 @@
 #include <any>
 #include "../querybuilder/IQueryBuilder.h"
 
-class IDatabase;
-
 struct DatabaseQueryQueue
 {
     std::any query;
@@ -39,6 +37,7 @@ public:
     virtual void AddQueryQueue(DatabaseQueryQueue data) = 0;
 
     virtual IQueryBuilder* ProvideQueryBuilder() = 0;
+    virtual void DeallocateQueryBuilder(IQueryBuilder* qb) = 0;
 };
 
 #endif

@@ -5,6 +5,6 @@
 #include <unordered_map>
 
 std::unordered_map<std::string, std::vector<ValidationRule>> parseRules(std::unordered_map<std::string, std::string> rules);
-std::string GenerateColumnType(std::string column_name, std::vector<ValidationRule> rules);
+std::string GenerateColumnType(std::string column_name, std::vector<ValidationRule> rules, std::string server_version);
 
 #endif

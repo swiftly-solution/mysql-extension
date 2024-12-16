@@ -23,6 +23,7 @@ private:
     std::mutex mtx;
 
     const char* error = nullptr;
+    std::string m_version;
 
 public:
     std::deque<DatabaseQueryQueue> queryQueue;
@@ -45,6 +46,7 @@ public:
     void AddQueryQueue(DatabaseQueryQueue data);
 
     IQueryBuilder* ProvideQueryBuilder();
+    void DeallocateQueryBuilder(IQueryBuilder* qb);
 };
 
 #endif
