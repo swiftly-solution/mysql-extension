@@ -45,8 +45,7 @@ public:
 
     void AddQueryQueue(DatabaseQueryQueue data);
 
-    IQueryBuilder* ProvideQueryBuilder();
-    void DeallocateQueryBuilder(IQueryBuilder* qb);
+    const char* ProvideQueryBuilderTable();
 };
 
 #endif

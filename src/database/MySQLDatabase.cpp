@@ -2,7 +2,6 @@
 #include "../entrypoint.h"
 #include "../utils.h"
 #include <thread>
-#include "../querybuilder/QueryBuilder.h"
 
 extern bool threadStarted;
 void DriverThink();
@@ -212,12 +211,7 @@ void MySQLDatabase::AddQueryQueue(DatabaseQueryQueue data)
     }
 }
 
-IQueryBuilder* MySQLDatabase::ProvideQueryBuilder()
+const char* MySQLDatabase::ProvideQueryBuilderTable()
 {
-    return new QueryBuilder(this->GetVersion());
-}
-
-void MySQLDatabase::DeallocateQueryBuilder(IQueryBuilder* qb)
-{
-    delete (QueryBuilder*)qb;
+    return "MySQL_QB";
 }

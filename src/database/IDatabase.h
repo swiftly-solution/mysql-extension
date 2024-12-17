@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 #include <any>
-#include "../querybuilder/IQueryBuilder.h"
 
 struct DatabaseQueryQueue
 {
@@ -36,8 +35,7 @@ public:
 
     virtual void AddQueryQueue(DatabaseQueryQueue data) = 0;
 
-    virtual IQueryBuilder* ProvideQueryBuilder() = 0;
-    virtual void DeallocateQueryBuilder(IQueryBuilder* qb) = 0;
+    virtual const char* ProvideQueryBuilderTable() = 0;
 };
 
 #endif
