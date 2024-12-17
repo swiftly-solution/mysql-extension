@@ -237,9 +237,52 @@ function MySQL_QB:Create(columns)
     return self
 end
 
---- @param columns table
-function MySQL_QB:Alter(columns)
-    print("[MySQL - QueryBuilder] Alter is not currently implemented.")
+--- @param addColumns table
+--- @param removeColumns table
+--- @param modifyColumns table
+function MySQL_QB:Alter(addColumns, removeColumns, modifyColumns)
+    if self.tableName:len() <= 0 then
+        return error("Table name must be set before executing the query.")
+    end
+
+    if type(addColumns) ~= "table" or type(removeColumns) ~= "table" or type(modifyColumns) ~= "table" then
+        return error("Alter requires add and remove columns to be a list.")
+    end
+
+    local addRules = parseRules(addColumns)
+    local modifyRules = parseRules(modifyColumns)
+    local definitions = {}
+
+    for i=1,#addRules do
+        local columnName = addRules[i][1]
+        local columnRules = addRules[i][2]
+
+        local typ = GenerateColumnType(columnName, columnRules, self.db:GetVersion())
+        if typ then
+            definitions[#definitions + 1] = "ADD COLUMN " .. columnName .. " " .. typ
+        end
+    end
+
+    for i=1,#modifyRules do
+        local columnName = modifyRules[i][1]
+        local columnRules = modifyRules[i][2]
+
+        local typ = GenerateColumnType(columnName, columnRules, self.db:GetVersion())
+        if typ then
+            definitions[#definitions + 1] = "MODIFY COLUMN " .. columnName .. " " .. typ
+        end
+    end
+
+    for i=1,#removeColumns do
+        definitions[#definitions + 1] = "DROP COLUMN " .. removeColumns[i]
+    end
+
+    if #definitions == 0 then
+        return error("Alter requires at least one added or one removed column.")
+    end
+
+    self.query = "ALTER TABLE " .. self.tableName .. " " .. table.concat(definitions, ", ")
+
     return self
 end
 
