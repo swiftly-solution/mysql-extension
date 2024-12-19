@@ -127,8 +127,8 @@ local function GenerateColumnType(columnName, columnRules, version)
             defaultSet = true
         elseif name == "float" then
             ret_type = "FLOAT"
-        elseif name == "default" then
-            defaultValue = "{}"
+        elseif name == "default" and (param or ""):len() > 0 then
+            defaultValue = param
             defaultSet = true
         elseif name == "unique" then
             unique = true
@@ -144,6 +144,9 @@ local function GenerateColumnType(columnName, columnRules, version)
             index = true
         elseif name == "autoincrement" then
             autoIncrement = true
+            unique = false
+            primary_key = true
+            index = false
         end
     end
 
@@ -186,7 +189,7 @@ function MySQL_QB:FormatSQLValue(value)
     if value == "nil" or value == nil then
         return "NULL"
     elseif type(value) == "table" then
-        return json.encode(value)
+        return "'"..self.db:EscapeString(json.encode(value)).."'"
     elseif type(value) == "string" then
         return "'".. self.db:EscapeString(value) .."'"
     else
@@ -199,7 +202,7 @@ function MySQL_QB:new(db)
     local o = {}
     setmetatable(o, self)
     self.__index = self
-    self.db = db
+    o.db = db
     return o
 end
 
