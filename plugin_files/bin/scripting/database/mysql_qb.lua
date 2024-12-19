@@ -189,9 +189,9 @@ function MySQL_QB:FormatSQLValue(value)
     if value == "nil" or value == nil then
         return "NULL"
     elseif type(value) == "table" then
-        return "'"..self.db:EscapeString(json.encode(value)).."'"
+        return "\""..self.db:EscapeString(json.encode(value)).."\""
     elseif type(value) == "string" then
-        return "'".. self.db:EscapeString(value) .."'"
+        return "\"".. self.db:EscapeString(value) .."\""
     else
         return tostring(value)
     end
@@ -203,6 +203,20 @@ function MySQL_QB:new(db)
     setmetatable(o, self)
     self.__index = self
     o.db = db
+    o.tableName = ""
+    o.query = ""
+    o.whereClauses = {}
+    o.orWhereClauses = {}
+    o.joinClauses = {}
+    o.groupByClauses = {}
+    o.orderByClauses = {}
+    o.onDuplicateClauses = {}
+    o.havingClauses = {}
+    o.unionClauses = {}
+    o.updatePairs = {}
+    o.isDistinct = false
+    o.limitCount = -1
+    o.offsetCount = -1
     return o
 end
 
