@@ -7,6 +7,7 @@ local oldServerVersions = {
     "5.5",
     "5.6",
     "5.7",
+    "8.0"
 }
 
 local oldServerCache = {}
@@ -33,11 +34,11 @@ end
 --- @return table
 local function parseRules(columns)
     local ret = {}
-    for k,v in next,columns,nil do
+    for k, v in next, columns, nil do
         local rules = string.split(v, "|")
         local validatedRules = {}
 
-        for i=1,#rules do
+        for i = 1, #rules do
             validatedRules[#validatedRules + 1] = parseRule(rules[i])
         end
 
@@ -66,8 +67,8 @@ local function GenerateColumnType(columnName, columnRules, version, db)
     local oldServer = oldServerCache[version]
     if oldServer == nil then
         oldServer = false
-        for i=1,#oldServerVersions do
-            if version:find("^"..oldServerVersions[i]) ~= nil then
+        for i = 1, #oldServerVersions do
+            if version:find("^" .. oldServerVersions[i]) ~= nil then
                 oldServer = true
                 break
             end
@@ -75,7 +76,7 @@ local function GenerateColumnType(columnName, columnRules, version, db)
         oldServerCache[version] = oldServer
     end
 
-    for i=1,#columnRules do
+    for i = 1, #columnRules do
         local name = columnRules[i][1]
         local param = columnRules[i][2]
 
@@ -100,11 +101,14 @@ local function GenerateColumnType(columnName, columnRules, version, db)
         elseif (name == "max" or name == "size") and (param or ""):len() > 0 then
             local val = math.floor(tonumber(param) or 0)
             if ret_type:find("VARCHAR") ~= nil and val > 0 then
-                ret_type = "VARCHAR("..val..")"
+                ret_type = "VARCHAR(" .. val .. ")"
             end
         elseif name == "json" then
-            if oldServer then ret_type = "VARCHAR(16380)"
-            else ret_type = "JSON" end
+            if oldServer then
+                ret_type = "VARCHAR(8192)"
+            else
+                ret_type = "JSON"
+            end
 
             defaultValue = "{}"
             defaultSet = true
@@ -141,9 +145,9 @@ local function GenerateColumnType(columnName, columnRules, version, db)
 
     if defaultSet then
         if ret_type:find("^JSON") ~= nil or ret_type:find("^VARCHAR") ~= nil then
-            ret_type = ret_type .. " DEFAULT \""..db:EscapeString(defaultValue).."\""
+            ret_type = ret_type .. " DEFAULT \"" .. db:EscapeString(defaultValue) .. "\""
         else
-            ret_type = ret_type .. " DEFAULT "..defaultValue
+            ret_type = ret_type .. " DEFAULT " .. defaultValue
         end
     end
 
@@ -191,9 +195,9 @@ function MySQL_QB(db)
         if value == "nil" or value == nil then
             return "NULL"
         elseif type(value) == "table" then
-            return "\""..self.db:EscapeString(json.encode(value)).."\""
+            return "\"" .. self.db:EscapeString(json.encode(value)) .. "\""
         elseif type(value) == "string" then
-            return "\"".. self.db:EscapeString(value) .."\""
+            return "\"" .. self.db:EscapeString(value) .. "\""
         else
             return tostring(value)
         end
@@ -218,13 +222,13 @@ function MySQL_QB(db)
         local rules = parseRules(columns)
         local definitions = {}
 
-        for i=1,#rules do
+        for i = 1, #rules do
             local columnName = rules[i][1]
             local columnRules = rules[i][2]
 
             local typ = GenerateColumnType(columnName, columnRules, self.db:GetVersion(), self.db)
             if typ then
-                definitions[#definitions + 1] = table.concat({columnName, typ}, " ")
+                definitions[#definitions + 1] = table.concat({ columnName, typ }, " ")
             end
         end
 
@@ -249,7 +253,7 @@ function MySQL_QB(db)
         local modifyRules = parseRules(modifyColumns)
         local definitions = {}
 
-        for i=1,#addRules do
+        for i = 1, #addRules do
             local columnName = addRules[i][1]
             local columnRules = addRules[i][2]
 
@@ -259,7 +263,7 @@ function MySQL_QB(db)
             end
         end
 
-        for i=1,#modifyRules do
+        for i = 1, #modifyRules do
             local columnName = modifyRules[i][1]
             local columnRules = modifyRules[i][2]
 
@@ -269,7 +273,7 @@ function MySQL_QB(db)
             end
         end
 
-        for i=1,#removeColumns do
+        for i = 1, #removeColumns do
             definitions[#definitions + 1] = "DROP COLUMN " .. removeColumns[i]
         end
 
@@ -300,7 +304,7 @@ function MySQL_QB(db)
         if type(columns) ~= "table" or #columns == 0 then
             self.query = "SELECT * FROM " .. self.tableName
         else
-            self.query = "SELECT ".. table.concat(columns, ", ") .." FROM " .. self.tableName
+            self.query = "SELECT " .. table.concat(columns, ", ") .. " FROM " .. self.tableName
         end
 
         return self
@@ -319,12 +323,13 @@ function MySQL_QB(db)
         local cols = {}
         local vals = {}
 
-        for k,v in next,values,nil do
+        for k, v in next, values, nil do
             cols[#cols + 1] = k
             vals[#vals + 1] = self:FormatSQLValue(v)
         end
 
-        self.query = "INSERT INTO " .. self.tableName .. " (" .. table.concat(cols, ", ") .. ") VALUES (" .. table.concat(vals, ", ") .. ")"
+        self.query = "INSERT INTO " ..
+            self.tableName .. " (" .. table.concat(cols, ", ") .. ") VALUES (" .. table.concat(vals, ", ") .. ")"
 
         return self
     end
@@ -341,7 +346,7 @@ function MySQL_QB(db)
 
         local updates = {}
 
-        for k,v in next,values,nil do
+        for k, v in next, values, nil do
             updates[#updates + 1] = k .. " = " .. o:FormatSQLValue(v)
         end
 
@@ -459,7 +464,7 @@ function MySQL_QB(db)
             return error("OnDuplicate requires at least one column-value pair.")
         end
 
-        for col,val in next,data,nil do
+        for col, val in next, data, nil do
             self.onDuplicateClauses[#self.onDuplicateClauses + 1] = col .. " = " .. self:FormatSQLValue(val)
         end
 
@@ -472,7 +477,7 @@ function MySQL_QB(db)
             return error("OrderBy requires at least one column-order pair.")
         end
 
-        for col,val in next,columns,nil do
+        for col, val in next, columns, nil do
             self.orderByClauses[#self.orderByClauses + 1] = col .. " " .. val
         end
 
@@ -483,7 +488,7 @@ function MySQL_QB(db)
         local finalStr = self.query
 
         if self.query:find("^SELECT") ~= nil and self.isDistinct then
-            finalStr, _ = self.query:gsub("()", {[7] = " DISTINCT"})
+            finalStr, _ = self.query:gsub("()", { [7] = " DISTINCT" })
         end
 
         if #self.joinClauses > 0 then
@@ -508,7 +513,7 @@ function MySQL_QB(db)
         end
 
         if #self.groupByClauses > 0 then
-            finalStr = finalStr .. " GROUP BY " ..  table.concat(self.groupByClauses, ", ")
+            finalStr = finalStr .. " GROUP BY " .. table.concat(self.groupByClauses, ", ")
         end
 
         if #self.havingClauses > 0 then
@@ -516,7 +521,7 @@ function MySQL_QB(db)
         end
 
         if #self.orderByClauses > 0 then
-            finalStr = finalStr .. " ORDER BY " ..  table.concat(self.orderByClauses, ", ")
+            finalStr = finalStr .. " ORDER BY " .. table.concat(self.orderByClauses, ", ")
         end
 
         if self.limitCount >= 0 then
