@@ -6,8 +6,7 @@ local oldServerVersions = {
     "5.4",
     "5.5",
     "5.6",
-    "5.7",
-    "8.0"
+    "5.7"
 }
 
 local oldServerCache = {}
@@ -145,7 +144,11 @@ local function GenerateColumnType(columnName, columnRules, version, db)
 
     if defaultSet then
         if ret_type:find("^JSON") ~= nil or ret_type:find("^VARCHAR") ~= nil then
-            ret_type = ret_type .. " DEFAULT \"" .. db:EscapeString(defaultValue) .. "\""
+            if version:find("^8.0") then
+                ret_type = ret_type .. " DEFAULT (\"" .. db:EscapeString(defaultValue) .. "\")"
+            else
+                ret_type = ret_type .. " DEFAULT \"" .. db:EscapeString(defaultValue) .. "\""
+            end
         else
             ret_type = ret_type .. " DEFAULT " .. defaultValue
         end
