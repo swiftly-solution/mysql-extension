@@ -140,16 +140,8 @@ local function GenerateColumnType(tblName, columnName, columnRules, version, db)
     end
 
     if defaultSet then
-        if ret_type:find("^TEXT") ~= nil and oldServer then
-            if version:find("^8.0") then
-                ret_type = ret_type .. " DEFAULT (\"" .. db:EscapeString(defaultValue) .. "\")"
-            else
-                if not defaultValuesCacheTbl[tblName] then defaultValuesCacheTbl[tblName] = {} end
-                defaultValuesCacheTbl[tblName][columnName] = defaultValue
-            end
-        else
-            ret_type = ret_type .. " DEFAULT " .. defaultValue
-        end
+        if not defaultValuesCacheTbl[tblName] then defaultValuesCacheTbl[tblName] = {} end
+        defaultValuesCacheTbl[tblName][columnName] = ((ret_type:find("^VARCHAR") ~= nil or ret_type:find("^TEXT") ~= nil) and defaultValue or tonumber(defaultValue))
     end
 
     if autoIncrement then
