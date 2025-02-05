@@ -6,10 +6,12 @@ local oldServerVersions = {
     "5.4",
     "5.5",
     "5.6",
-    "5.7"
+    "5.7",
+    "8.0"
 }
 
 local oldServerCache = {}
+local defaultValuesCacheTbl = {}
 
 --- @param rule string
 --- @return table
@@ -51,7 +53,7 @@ end
 --- @param version string
 --- @param db Database
 --- @return string
-local function GenerateColumnType(columnName, columnRules, version, db)
+local function GenerateColumnType(tblName, columnName, columnRules, version, db)
     local ret_type = "VARCHAR(255)"
     local defaultValue = ""
 
@@ -103,12 +105,7 @@ local function GenerateColumnType(columnName, columnRules, version, db)
                 ret_type = "VARCHAR(" .. val .. ")"
             end
         elseif name == "json" then
-            if oldServer then
-                ret_type = "VARCHAR(8192)"
-            else
-                ret_type = "JSON"
-            end
-
+            ret_type = "TEXT"
             defaultValue = "{}"
             defaultSet = true
         elseif name == "float" then
@@ -143,11 +140,12 @@ local function GenerateColumnType(columnName, columnRules, version, db)
     end
 
     if defaultSet then
-        if ret_type:find("^JSON") ~= nil or ret_type:find("^VARCHAR") ~= nil then
+        if ret_type:find("^TEXT") ~= nil and oldServer then
             if version:find("^8.0") then
                 ret_type = ret_type .. " DEFAULT (\"" .. db:EscapeString(defaultValue) .. "\")"
             else
-                ret_type = ret_type .. " DEFAULT \"" .. db:EscapeString(defaultValue) .. "\""
+                if not defaultValuesCacheTbl[tblName] then defaultValuesCacheTbl[tblName] = {} end
+                defaultValuesCacheTbl[tblName][columnName] = defaultValue
             end
         else
             ret_type = ret_type .. " DEFAULT " .. defaultValue
@@ -229,7 +227,7 @@ function MySQL_QB(db)
             local columnName = rules[i][1]
             local columnRules = rules[i][2]
 
-            local typ = GenerateColumnType(columnName, columnRules, self.db:GetVersion(), self.db)
+            local typ = GenerateColumnType(self.tableName, columnName, columnRules, self.db:GetVersion(), self.db)
             if typ then
                 definitions[#definitions + 1] = table.concat({ columnName, typ }, " ")
             end
@@ -260,7 +258,7 @@ function MySQL_QB(db)
             local columnName = addRules[i][1]
             local columnRules = addRules[i][2]
 
-            local typ = GenerateColumnType(columnName, columnRules, self.db:GetVersion(), self.db)
+            local typ = GenerateColumnType(self.tableName, columnName, columnRules, self.db:GetVersion(), self.db)
             if typ then
                 definitions[#definitions + 1] = "ADD COLUMN " .. columnName .. " " .. typ
             end
@@ -270,7 +268,7 @@ function MySQL_QB(db)
             local columnName = modifyRules[i][1]
             local columnRules = modifyRules[i][2]
 
-            local typ = GenerateColumnType(columnName, columnRules, self.db:GetVersion(), self.db)
+            local typ = GenerateColumnType(self.tableName, columnName, columnRules, self.db:GetVersion(), self.db)
             if typ then
                 definitions[#definitions + 1] = "MODIFY COLUMN " .. columnName .. " " .. typ
             end
@@ -325,10 +323,22 @@ function MySQL_QB(db)
 
         local cols = {}
         local vals = {}
+        local registeredCols = {}
 
         for k, v in next, values, nil do
             cols[#cols + 1] = k
+            registeredCols[k] = true
             vals[#vals + 1] = self:FormatSQLValue(v)
+        end
+
+        if defaultValuesCacheTbl[self.tableName] then
+            for colName, colValue in next,defaultValuesCacheTbl[self.tableName],nil do
+                if not registeredCols[colName] then
+                    registeredCols[colName] = true
+                    cols[#cols + 1] = colName
+                    vals[#vals + 1] = self:FormatSQLValue(colValue)
+                end
+            end
         end
 
         self.query = "INSERT INTO " ..

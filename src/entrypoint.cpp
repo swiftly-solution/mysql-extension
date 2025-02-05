@@ -85,7 +85,6 @@ bool isServerHibernating = true;
 void MySQLExtension::Hook_ServerHibernationUpdate(bool bHibernation)
 {
     isServerHibernating = bHibernation;
-    if(bHibernation) Hook_GameFrame(false, false, true);
 }
 
 void MySQLExtension::NextFrame(std::function<void(std::vector<std::any>)> fn, std::vector<std::any> param)
