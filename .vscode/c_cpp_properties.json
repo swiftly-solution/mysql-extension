@@ -10,7 +10,9 @@
                 "${workspaceFolder}/src/**",
                 "${workspaceFolder}/vendor/**",
                 "${workspaceFolder}/vendor/mysql/win64/include/**",
-                "${workspaceFolder}/vendor/LuaBridge/Source/**",
+                "${workspaceFolder}/vendor/embedder/src/**",
+                "${workspaceFolder}/vendor/embedder/libs/js/**",
+                "${workspaceFolder}/vendor/embedder/libs/lua/**",
                 "${workspaceFolder}/vendor/json/include/**"
             ],
             "defines": [
@@ -35,7 +37,9 @@
                 "${workspaceFolder}/src/**",
                 "${workspaceFolder}/vendor/**",
                 "${workspaceFolder}/vendor/mysql/linuxsteamrt64/include/**",
-                "${workspaceFolder}/vendor/LuaBridge/Source/**",
+                "${workspaceFolder}/vendor/embedder/src/**",
+                "${workspaceFolder}/vendor/embedder/libs/js/**",
+                "${workspaceFolder}/vendor/embedder/libs/lua/**",
                 "${workspaceFolder}/vendor/json/include/**"
             ],
             "defines": [
