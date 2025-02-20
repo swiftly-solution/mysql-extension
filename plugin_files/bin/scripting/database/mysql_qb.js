@@ -162,6 +162,7 @@ function GenerateColumnType(tblName, columnName, columnRules, version, db) {
 }
 
 function MySQL_QB(db) {
+    
     return {
         db,
         tableName: "",
@@ -181,9 +182,9 @@ function MySQL_QB(db) {
 
         formatSQLValue(value) {
             if (value === null || value === undefined) return "NULL";
-            if (typeof value === "object") return `"${db.escapeString(JSON.stringify(value))}"`;
-            if (typeof value === "string") return `"${db.escapeString(value)}"`;
-            return String(value);
+            else if (typeof value === "object") return `"${db.EscapeString(JSON.stringify(value))}"`;
+            else if (typeof value === "string") return `"${db.EscapeString(value)}"`;
+            else return String(value);
         },
 
         Table(tblName) {
