@@ -70,5 +70,6 @@
         "cfenv": "cpp",
         "codecvt": "cpp",
         "charconv": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "/root/mysql-extension/vendor/json"
 }

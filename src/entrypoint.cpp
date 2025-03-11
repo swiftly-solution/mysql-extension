@@ -8,8 +8,7 @@
 
 CREATE_GLOBALVARS();
 
-SH_DECL_HOOK3_void(IServerGameDLL, GameFrame, SH_NOATTRIB, 0, bool, bool, bool);
-SH_DECL_HOOK1_void(IServerGameDLL, ServerHibernationUpdate, SH_NOATTRIB, 0, bool);
+SH_DECL_HOOK1_void(ISource2Server, PreWorldUpdate, SH_NOATTRIB, 0, bool);
 
 ISource2Server* server = nullptr;
 
@@ -64,13 +63,12 @@ bool MySQLExtension::Load(std::string& error, SourceHook::ISourceHook *SHPtr, IS
 
     reinterpret_cast<RegisterDriver>(regPtr)((void*)&g_dbDriver);
 
-    SH_ADD_HOOK_MEMFUNC(IServerGameDLL, GameFrame, server, this, &MySQLExtension::Hook_GameFrame, true);
-    SH_ADD_HOOK_MEMFUNC(IServerGameDLL, ServerHibernationUpdate, server, this, &MySQLExtension::Hook_ServerHibernationUpdate, true);
+    SH_ADD_HOOK_MEMFUNC(ISource2Server, PreWorldUpdate, server, this, &MySQLExtension::PreWorldUpdate, true);
 
     return true;
 }
 
-void MySQLExtension::Hook_GameFrame(bool simulating, bool bFirstTick, bool bLastTick)
+void MySQLExtension::PreWorldUpdate(bool bSimulating)
 {
     while (!m_nextFrame.empty())
     {
@@ -80,25 +78,14 @@ void MySQLExtension::Hook_GameFrame(bool simulating, bool bFirstTick, bool bLast
     }
 }
 
-bool isServerHibernating = true;
-
-void MySQLExtension::Hook_ServerHibernationUpdate(bool bHibernation)
-{
-    isServerHibernating = bHibernation;
-}
-
 void MySQLExtension::NextFrame(std::function<void(std::vector<std::any>)> fn, std::vector<std::any> param)
 {
-    if (isServerHibernating)
-        fn(param);
-    else
-        m_nextFrame.push_back({ fn, param });
+    m_nextFrame.push_back({ fn, param });
 }
 
 bool MySQLExtension::Unload(std::string& error)
 {
-    SH_REMOVE_HOOK_MEMFUNC(IServerGameDLL, GameFrame, server, this, &MySQLExtension::Hook_GameFrame, true);
-    SH_REMOVE_HOOK_MEMFUNC(IServerGameDLL, ServerHibernationUpdate, server, this, &MySQLExtension::Hook_ServerHibernationUpdate, true);
+    SH_REMOVE_HOOK_MEMFUNC(ISource2Server, PreWorldUpdate, server, this, &MySQLExtension::PreWorldUpdate, true);
 
     UnloadHooks();
     return true;

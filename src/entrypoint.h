@@ -23,8 +23,7 @@ public:
     bool OnPluginLoad(std::string pluginName, void* pluginState, PluginKind_t kind, std::string& error);
     bool OnPluginUnload(std::string pluginName, void* pluginState, PluginKind_t kind, std::string& error);
 
-    void Hook_GameFrame(bool simulating, bool bFirstTick, bool bLastTick);
-    void Hook_ServerHibernationUpdate(bool bHibernation);
+    void PreWorldUpdate(bool bSimulating);
 
 public:
     const char* GetAuthor();
