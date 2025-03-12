@@ -248,8 +248,20 @@ function MySQL_QB(db) {
         Insert(values){
             if (this.tableName.length <= 0) throw new Error("Table name must be set before executing the query.");
             if (isObjectEmpty(values)) throw new Error("Insert requires at least one column-value pair.");
+
+            let registeredCols = []
             const cols = Object.keys(values);
+            registeredCols = cols;
             const vals = cols.map(col => this.formatSQLValue(values[col]));
+
+            if(defaultValuesCacheTbl.hasOwnProperty(this.tableName)) {
+                for(const [columnName, columnValue] of Object.entries(defaultValuesCacheTbl[this.tableName])) {
+                    registeredCols.push(columnName);
+                    cols.push(columnName)
+                    vals.push(this.formatSQLValue(columnValue));
+                }
+            }
+
             this.query = `INSERT INTO ${this.tableName} (${cols.join(", ")}) VALUES (${vals.join(", ")})`;
             return this;
         },
