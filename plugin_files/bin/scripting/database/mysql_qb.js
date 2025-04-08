@@ -138,8 +138,12 @@ function GenerateColumnType(tblName, columnName, columnRules, version, db) {
     retType += isNullable ? " NULL" : " NOT NULL";
 
     if (defaultSet) {
-        defaultValuesCacheTbl[tblName] = defaultValuesCacheTbl[tblName] || {};
-        defaultValuesCacheTbl[tblName][columnName] = retType.startsWith("VARCHAR") || retType.startsWith("TEXT") ? defaultValue : Number(defaultValue);
+        if(retType.startsWith("VARCHAR") || retType.startsWith("TEXT")) {
+            defaultValuesCacheTbl[tblName] = defaultValuesCacheTbl[tblName] || {};
+            defaultValuesCacheTbl[tblName][columnName] = (retType.startsWith("VARCHAR") || retType.startsWith("TEXT") || retType.startsWith("DATE")) ? defaultValue : Number(defaultValue);
+        } else {
+            retType += " DEFAULT " + defaultValue;
+        }
     }
 
     if (autoIncrement) {
