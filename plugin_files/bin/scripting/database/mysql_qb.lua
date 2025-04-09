@@ -140,7 +140,7 @@ local function GenerateColumnType(tblName, columnName, columnRules, version, db)
     end
 
     if defaultSet then
-        if ret_type:find("^TEXT") ~= nil || ret_type:find("^VARCHAR") ~= nil then
+        if ret_type:find("^TEXT") ~= nil or ret_type:find("^VARCHAR") ~= nil then
             if not defaultValuesCacheTbl[tblName] then defaultValuesCacheTbl[tblName] = {} end
             defaultValuesCacheTbl[tblName][columnName] = defaultValue
         else
