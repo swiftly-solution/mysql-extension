@@ -13,7 +13,9 @@
                 "${workspaceFolder}/vendor/embedder/src/**",
                 "${workspaceFolder}/vendor/embedder/libs/js/**",
                 "${workspaceFolder}/vendor/embedder/libs/lua/**",
-                "${workspaceFolder}/vendor/json/include/**"
+                "${workspaceFolder}/vendor/json/include/**",
+                "${workspaceFolder}/vendor/swiftly-ext/hooks/**",
+                "${workspaceFolder}/vendor/swiftly-ext/hooks/dynohook/**"
             ],
             "defines": [
                 "_DEBUG",
@@ -40,7 +42,9 @@
                 "${workspaceFolder}/vendor/embedder/src/**",
                 "${workspaceFolder}/vendor/embedder/libs/js/**",
                 "${workspaceFolder}/vendor/embedder/libs/lua/**",
-                "${workspaceFolder}/vendor/json/include/**"
+                "${workspaceFolder}/vendor/json/include/**",
+                "${workspaceFolder}/vendor/swiftly-ext/hooks/**",
+                "${workspaceFolder}/vendor/swiftly-ext/hooks/dynohook/**"
             ],
             "defines": [
                 "_DEBUG",

@@ -14,7 +14,6 @@ ISource2Server* server = nullptr;
 
 MySQLExtension g_Ext;
 DBDriver g_dbDriver;
-CUtlVector<FuncHookBase *> g_vecHooks;
 
 typedef void (*RegisterDriver)(void*);
 
@@ -31,29 +30,25 @@ extern "C" FILE* __cdecl __iob_func(void)
 #endif
 
 EXT_EXPOSE(g_Ext);
-bool MySQLExtension::Load(std::string& error, SourceHook::ISourceHook *SHPtr, ISmmAPI* ismm, bool late)
+bool MySQLExtension::Load(std::string& error, SourceHook::ISourceHook* SHPtr, ISmmAPI* ismm, bool late)
 {
     SAVE_GLOBALVARS();
-    if(!InitializeHooks()) {
-        error = "Failed to initialize hooks.";
-        return false;
-    }
 
     GET_IFACE_ANY(GetServerFactory, server, ISource2Server, INTERFACEVERSION_SERVERGAMEDLL);
 
     HINSTANCE m_hModule;
-    #ifdef _WIN32
-        m_hModule = dlmount(GeneratePath("addons/swiftly/bin/win64/swiftly.dll"));
-    #else
-        m_hModule = dlopen(GeneratePath("addons/swiftly/bin/linuxsteamrt64/swiftly.so"), RTLD_NOW);
-        if(!m_hModule) {
-            error = "Could not open swiftly.so as a module.";
-            return false;
-        }
-    #endif
+#ifdef _WIN32
+    m_hModule = dlmount(GeneratePath("addons/swiftly/bin/win64/swiftly.dll"));
+#else
+    m_hModule = dlopen(GeneratePath("addons/swiftly/bin/linuxsteamrt64/swiftly.so"), RTLD_NOW);
+    if (!m_hModule) {
+        error = "Could not open swiftly.so as a module.";
+        return false;
+    }
+#endif
 
     void* regPtr = reinterpret_cast<void*>(dlsym(m_hModule, "swiftly_RegisterDBDriver"));
-    if(!regPtr) {
+    if (!regPtr) {
         error = "Could not find the following exported function: 'swiftly_RegisterDBDriver'.";
         dlclose(m_hModule);
         return false;
@@ -87,7 +82,6 @@ bool MySQLExtension::Unload(std::string& error)
 {
     SH_REMOVE_HOOK_MEMFUNC(ISource2Server, PreWorldUpdate, server, this, &MySQLExtension::PreWorldUpdate, true);
 
-    UnloadHooks();
     return true;
 }
 
