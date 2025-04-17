@@ -165,7 +165,9 @@ for sdk_target in MMSPlugin.sdk_targets:
         os.path.join(builder.sourcePath, 'vendor', 'embedder', 'src'),
         os.path.join(builder.sourcePath, 'vendor', 'json', 'include'),
         os.path.join(builder.sourcePath, 'vendor', 'mysql', ('win64' if binary.compiler.target.platform == 'windows' else 'linuxsteamrt64'), 'include'),
-
+        os.path.join(builder.sourcePath, 'vendor', 'swiftly-ext', 'hooks'),
+        os.path.join(builder.sourcePath, 'vendor', 'swiftly-ext', 'hooks', 'dynohook'),
+        
         os.path.join(sdk['path']),
         os.path.join(sdk['path'], 'public'),
         os.path.join(sdk['path'], 'public', 'entity2'),
