@@ -1,6 +1,7 @@
 #include "entrypoint.h"
 #include "driver/DBDriver.h"
 #include <swiftly-ext/files.h>
+#include "metamod_oslink.h"
 
 //////////////////////////////////////////////////////////////
 /////////////////        Core Variables        //////////////
