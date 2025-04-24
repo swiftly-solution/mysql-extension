@@ -81,7 +81,6 @@ void DriverThink()
                 auto queue = db->queryQueue.front();
 
                 auto queryResult = db->Query(queue.query);
-                free((void*)(std::any_cast<const char*>(queue.query)));
                 auto error = db->GetError();
                 if (error == "MySQL server has gone away") {
                     if (db->Connect())
@@ -93,6 +92,7 @@ void DriverThink()
                 std::string result = QueryToJSON(queryResult);
                 g_Ext.NextFrame(DatabaseCallback, { queue.requestID, result, error });
 
+                free((void*)(std::any_cast<const char*>(queue.query)));
                 db->queryQueue.pop_front();
             }
         }
