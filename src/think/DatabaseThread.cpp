@@ -71,16 +71,17 @@ void DatabaseCallback(std::vector<std::any> res)
 
 void DriverThink()
 {
-    while(true) {
+    while (true) {
         auto dbs = g_dbDriver.GetDatabases();
-        for(auto rdb : dbs) {
+        for (auto rdb : dbs) {
             MySQLDatabase* db = (MySQLDatabase*)rdb;
-            if(!db->IsConnected()) continue;
+            if (!db->IsConnected()) continue;
 
-            while(!db->queryQueue.empty()) {
+            while (!db->queryQueue.empty()) {
                 auto queue = db->queryQueue.front();
 
                 auto queryResult = db->Query(queue.query);
+                free(std::any_cast<const char*>(queue.query));
                 auto error = db->GetError();
                 if (error == "MySQL server has gone away") {
                     if (db->Connect())

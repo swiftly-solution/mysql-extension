@@ -17,7 +17,7 @@ void MySQLDatabase::SetConnectionConfig(std::map<std::string, std::string> conne
 
 bool MySQLDatabase::Connect()
 {
-    if(this->connected) 
+    if (this->connected)
         return true;
 
     if (mysql_library_init(0, nullptr, nullptr) != 0)
@@ -58,7 +58,7 @@ bool MySQLDatabase::Connect()
 void MySQLDatabase::Close(bool setError)
 {
     if (setError) this->error = mysql_error(this->connection);
-    
+
     mysql_close(this->connection);
     this->connected = false;
 }
@@ -75,7 +75,7 @@ bool MySQLDatabase::HasError()
 
 std::string MySQLDatabase::GetError()
 {
-    if(!this->error) return "";
+    if (!this->error) return "";
 
     std::string err = this->error;
     this->error = nullptr;
@@ -91,10 +91,10 @@ std::any ParseFieldType(enum_field_types type, const char* value, uint32_t lengt
     else if (type == enum_field_types::MYSQL_TYPE_SHORT || type == enum_field_types::MYSQL_TYPE_TINY || type == enum_field_types::MYSQL_TYPE_INT24 || type == enum_field_types::MYSQL_TYPE_LONG || type == enum_field_types::MYSQL_TYPE_NEWDECIMAL || type == enum_field_types::MYSQL_TYPE_YEAR || type == enum_field_types::MYSQL_TYPE_BIT)
         return atoi(value);
     else if (
-        type == enum_field_types::MYSQL_TYPE_VARCHAR || 
-        type == enum_field_types::MYSQL_TYPE_VAR_STRING || 
-        type == enum_field_types::MYSQL_TYPE_BLOB || 
-        type == MYSQL_JSON || 
+        type == enum_field_types::MYSQL_TYPE_VARCHAR ||
+        type == enum_field_types::MYSQL_TYPE_VAR_STRING ||
+        type == enum_field_types::MYSQL_TYPE_BLOB ||
+        type == MYSQL_JSON ||
         type == enum_field_types::MYSQL_TYPE_TIMESTAMP ||
         type == enum_field_types::MYSQL_TYPE_DATE ||
         type == enum_field_types::MYSQL_TYPE_TIME ||
@@ -107,7 +107,7 @@ std::any ParseFieldType(enum_field_types type, const char* value, uint32_t lengt
         type == enum_field_types::MYSQL_TYPE_MEDIUM_BLOB ||
         type == enum_field_types::MYSQL_TYPE_LONG_BLOB ||
         type == enum_field_types::MYSQL_TYPE_GEOMETRY
-    ) {
+        ) {
         return std::string(value, length + 1);
     }
     else if (type == enum_field_types::MYSQL_TYPE_LONGLONG)
@@ -121,7 +121,7 @@ std::any ParseFieldType(enum_field_types type, const char* value, uint32_t lengt
 
 std::vector<std::map<std::string, std::any>> MySQLDatabase::Query(std::any query)
 {
-    const char* q = std::any_cast<std::string>(query).c_str();
+    const char* q = std::any_cast<const char*>(query);
     std::lock_guard<std::mutex> lock(mtx);
     std::vector<std::map<std::string, std::any>> values;
 
@@ -205,7 +205,7 @@ void MySQLDatabase::AddQueryQueue(DatabaseQueryQueue data)
 {
     queryQueue.push_back(data);
 
-    if(!threadStarted) {
+    if (!threadStarted) {
         threadStarted = true;
         std::thread(DriverThink).detach();
     }
