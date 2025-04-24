@@ -49,8 +49,8 @@ bool MySQLDatabase::Connect()
     mysql_set_character_set(this->connection, "utf8mb4");
     this->connected = true;
 
-    this->Query(string_format("ALTER DATABASE %s CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;", this->m_database.c_str()));
-    m_version = explode(std::any_cast<std::string>(this->Query(std::string("select @@version;"))[0]["@@version"]), "-")[0];
+    this->Query(string_format("ALTER DATABASE %s CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;", this->m_database.c_str()).c_str());
+    m_version = explode(std::any_cast<std::string>(this->Query("select @@version;")[0]["@@version"]), "-")[0];
 
     return true;
 }
