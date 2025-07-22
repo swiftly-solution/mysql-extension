@@ -432,7 +432,7 @@ function MySQL_QB(db) {
 
         Execute(cb) {
             let finalStr = this.PrepareQuery()
-            this.db.ExecuteQB(finalStr, cb)
+            this.db.Query(finalStr, cb)
         }
     }
 }

@@ -551,7 +551,7 @@ function MySQL_QB(db)
     --- @param cb fun(err:string,result:table)|nil
     function o:Execute(cb)
         local finalstr = self:PrepareQuery()
-        self.db:ExecuteQB(finalstr, cb)
+        self.db:Query(finalstr, cb)
     end
 
     return o
