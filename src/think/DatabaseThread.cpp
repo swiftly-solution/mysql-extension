@@ -65,8 +65,13 @@ std::string QueryToJSON(const std::vector<std::map<std::string, std::any>>& data
 
 void DatabaseCallback(std::vector<std::any> res)
 {
-    std::any result;
-    TriggerEvent("mysql.ext", "OnDatabaseActionPerformed", res, result);
+    std::string reqID = std::any_cast<std::string>(res[0]);
+    std::string result = std::any_cast<std::string>(res[1]);
+    std::string err = std::any_cast<std::string>(res[2]);
+    std::string plugin_name = std::any_cast<std::string>(res[3]);
+
+    std::any ares;
+    TriggerEvent("mysql.ext", "OnDatabaseActionPerformed", { reqID, result, err }, ares, plugin_name);
 }
 
 void DriverThink()
@@ -90,7 +95,7 @@ void DriverThink()
                 }
 
                 std::string result = QueryToJSON(queryResult);
-                g_Ext.NextFrame(DatabaseCallback, { queue.requestID, result, error });
+                g_Ext.NextFrame(DatabaseCallback, { queue.requestID, result, error, queue.plugin_name });
 
                 free((void*)(std::any_cast<const char*>(queue.query)));
                 db->queryQueue.pop_front();
