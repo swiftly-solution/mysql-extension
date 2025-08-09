@@ -244,16 +244,16 @@ namespace SwiftlyS2.API.Extensions
             return ret_type;
         }
 
-        public QueryBuilder(DB db)
+        public QueryBuilderMySQL(DB db)
         {
             m_db = db;
         }
-        public QueryBuilder Table(string table_name)
+        public QueryBuilderMySQL Table(string table_name)
         {
             tableName = table_name ?? "";
             return this;
         }
-        public QueryBuilder Select(string[] columns)
+        public QueryBuilderMySQL Select(string[] columns)
         {
             if (string.IsNullOrEmpty(tableName))
                 throw new ArgumentException("Table name must be set before executing the query.");
@@ -266,7 +266,7 @@ namespace SwiftlyS2.API.Extensions
             return this;
 
         }
-        public QueryBuilder Insert(Dictionary<string, object> values)
+        public QueryBuilderMySQL Insert(Dictionary<string, object> values)
         {
             if (string.IsNullOrEmpty(tableName))
                 throw new ArgumentException("Table name must be set before executing the query.");
@@ -302,7 +302,7 @@ namespace SwiftlyS2.API.Extensions
             return this;
 
         }
-        public QueryBuilder Update(Dictionary<string, object> values)
+        public QueryBuilderMySQL Update(Dictionary<string, object> values)
         {
             if (string.IsNullOrEmpty(tableName))
                 throw new ArgumentException("Table name must be set before executing the query.");
@@ -315,7 +315,7 @@ namespace SwiftlyS2.API.Extensions
             return this;
 
         }
-        public QueryBuilder Delete()
+        public QueryBuilderMySQL Delete()
         {
             if (string.IsNullOrEmpty(tableName))
                 throw new ArgumentException("Table name must be set before executing the query.");
@@ -324,7 +324,7 @@ namespace SwiftlyS2.API.Extensions
             return this;
 
         }
-        public QueryBuilder Where(string column, string oper, object value)
+        public QueryBuilderMySQL Where(string column, string oper, object value)
         {
             if (string.IsNullOrEmpty(column) || string.IsNullOrEmpty(oper))
                 throw new ArgumentException("Where requires the column and the operator to be a string.");
@@ -332,7 +332,7 @@ namespace SwiftlyS2.API.Extensions
             whereClauses.Add(column + " " + oper + " " + FormatSQLValue(value));
             return this;
         }
-        public QueryBuilder OrWhere(string column, string oper, object value)
+        public QueryBuilderMySQL OrWhere(string column, string oper, object value)
         {
             if (string.IsNullOrEmpty(column) || string.IsNullOrEmpty(oper))
                 throw new ArgumentException("OrWhere requires the column and the operator to be a string.");
@@ -340,7 +340,7 @@ namespace SwiftlyS2.API.Extensions
             orWhereClauses.Add(column + " " + oper + " " + FormatSQLValue(value));
             return this;
         }
-        public QueryBuilder Join(string table_name, string condition, string join_type)
+        public QueryBuilderMySQL Join(string table_name, string condition, string join_type)
         {
             if (string.IsNullOrEmpty(table_name) || string.IsNullOrEmpty(condition) || string.IsNullOrEmpty(join_type))
                 throw new ArgumentException("Join requires the table, the condition and the join type to be a string.");
@@ -348,7 +348,7 @@ namespace SwiftlyS2.API.Extensions
             joinClauses.Add(join_type + " JOIN " + table_name + " ON " + condition);
             return this;
         }
-        public QueryBuilder OrderBy(Dictionary<string, string> columns)
+        public QueryBuilderMySQL OrderBy(Dictionary<string, string> columns)
         {
             if (columns == null || columns.Count == 0)
                 throw new ArgumentException("OrderBy requires at least one column-order pair.");
@@ -358,12 +358,12 @@ namespace SwiftlyS2.API.Extensions
 
             return this;
         }
-        public QueryBuilder Limit(int count)
+        public QueryBuilderMySQL Limit(int count)
         {
             limitCount = count;
             return this;
         }
-        public QueryBuilder GroupBy(string[] columns)
+        public QueryBuilderMySQL GroupBy(string[] columns)
         {
             if (columns == null || columns.Length == 0)
                 throw new ArgumentException("GroupBy requires at least one column.");
@@ -371,7 +371,7 @@ namespace SwiftlyS2.API.Extensions
             groupByClauses = columns.ToList();
             return this;
         }
-        public QueryBuilder Create(Dictionary<string, string> values)
+        public QueryBuilderMySQL Create(Dictionary<string, string> values)
         {
             if (string.IsNullOrEmpty(tableName))
                 throw new ArgumentException("Table name must be set before executing the query.");
@@ -394,7 +394,7 @@ namespace SwiftlyS2.API.Extensions
             return this;
 
         }
-        public QueryBuilder Alter(Dictionary<string, string> add_columns, Dictionary<string, string> remove_columns, Dictionary<string, string> modify_columns)
+        public QueryBuilderMySQL Alter(Dictionary<string, string> add_columns, Dictionary<string, string> remove_columns, Dictionary<string, string> modify_columns)
         {
             if (string.IsNullOrEmpty(tableName))
                 throw new ArgumentException("Table name must be set before executing the query.");
@@ -433,7 +433,7 @@ namespace SwiftlyS2.API.Extensions
             return this;
 
         }
-        public QueryBuilder Drop()
+        public QueryBuilderMySQL Drop()
         {
             if (string.IsNullOrEmpty(tableName))
                 throw new ArgumentException("Table name must be set before executing the query.");
@@ -442,7 +442,7 @@ namespace SwiftlyS2.API.Extensions
             return this;
 
         }
-        public QueryBuilder OnDuplicate(Dictionary<string, object> update_value)
+        public QueryBuilderMySQL OnDuplicate(Dictionary<string, object> update_value)
         {
             if (update_value == null || update_value.Count == 0)
                 throw new ArgumentException("OnDuplicate requires at least one column-value pair.");
@@ -452,7 +452,7 @@ namespace SwiftlyS2.API.Extensions
 
             return this;
         }
-        public QueryBuilder Having(string condition)
+        public QueryBuilderMySQL Having(string condition)
         {
             if (string.IsNullOrEmpty(condition))
                 throw new ArgumentException("Having needs the condition to be a string and to not be empty.");
@@ -460,7 +460,7 @@ namespace SwiftlyS2.API.Extensions
             havingClauses.Add(condition);
             return this;
         }
-        public QueryBuilder Distinct()
+        public QueryBuilderMySQL Distinct()
         {
             if (string.IsNullOrEmpty(tableName))
                 throw new ArgumentException("Table name must be set before executing the query.");
@@ -468,7 +468,7 @@ namespace SwiftlyS2.API.Extensions
             isDistinct = true;
             return this;
         }
-        public QueryBuilder Offset(int offset)
+        public QueryBuilderMySQL Offset(int offset)
         {
             if (offset < 0)
                 throw new ArgumentException("Offset needs a count to be a number and positive.");
@@ -476,7 +476,7 @@ namespace SwiftlyS2.API.Extensions
             offsetCount = offset;
             return this;
         }
-        public QueryBuilder Union(string query, bool all)
+        public QueryBuilderMySQL Union(string query, bool all)
         {
             unionClauses.Add("UNION" + (all ? " ALL" : "") + " " + query);
             return this;
